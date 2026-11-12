@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="InfoHub Lite">
+  <!-- "Liquid level": the coolant's surface, with two warm dots of heat being carried off above it.
+       Source of truth for the mark; make-logo.ps1 redraws the same geometry at each icon size. -->
+  <defs>
+    <clipPath id="tile"><rect x="6" y="6" width="108" height="108" rx="30"/></clipPath>
+  </defs>
+  <g clip-path="url(#tile)">
+    <rect width="120" height="120" fill="#0F172A"/>
+    <path d="M0 60 C22 48 40 72 62 60 S100 48 120 58 V120 H0Z" fill="#155E68"/>
+    <path d="M0 74 C20 64 42 64 60 74 S98 86 120 72 V120 H0Z" fill="#2DD4BF"/>
+    <path d="M0 94 C24 86 44 98 66 92 S102 86 120 94 V120 H0Z" fill="#99F6E4"/>
+    <circle cx="82" cy="36" r="8" fill="#FB923C"/>
+    <circle cx="64" cy="47" r="3.5" fill="#FDBA74"/>
+  </g>
+  <!-- hairline edge so the dark tile keeps its shape on a dark taskbar -->
+  <rect x="7" y="7" width="106" height="106" rx="29" fill="none" stroke="#2B3A55" stroke-width="2"/>
+</svg>
