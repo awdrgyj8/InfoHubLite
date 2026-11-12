@@ -1,0 +1,171 @@
+<Window
+    x:Class="InfoHubLite.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+
+    <!-- Hidden: otherwise WinUI advertises the first shortcut below ("Delete") in a tooltip over the whole window. -->
+    <Grid x:Name="Root" KeyboardAcceleratorPlacementMode="Hidden">
+        <Grid.Resources>
+            <Style x:Key="Card" TargetType="Border">
+                <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="4" />
+                <Setter Property="Padding" Value="14,8" />
+                <Setter Property="MinHeight" Value="52" />
+            </Style>
+            <Style x:Key="Secondary" TargetType="TextBlock" BasedOn="{StaticResource CaptionTextBlockStyle}">
+                <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+            </Style>
+            <Style x:Key="Section" TargetType="TextBlock" BasedOn="{StaticResource BodyStrongTextBlockStyle}">
+                <Setter Property="Margin" Value="2,10,0,2" />
+            </Style>
+        </Grid.Resources>
+        <Grid.KeyboardAccelerators>
+            <KeyboardAccelerator Key="Delete" Invoked="Key_Invoked" />
+            <KeyboardAccelerator Key="Left" Invoked="Key_Invoked" />
+            <KeyboardAccelerator Key="Right" Invoked="Key_Invoked" />
+            <KeyboardAccelerator Key="Up" Invoked="Key_Invoked" />
+            <KeyboardAccelerator Key="Down" Invoked="Key_Invoked" />
+            <KeyboardAccelerator Key="Z" Modifiers="Control" Invoked="History_Invoked" />
+            <KeyboardAccelerator Key="Y" Modifiers="Control" Invoked="History_Invoked" />
+            <KeyboardAccelerator Key="Z" Modifiers="Control,Shift" Invoked="History_Invoked" />
+        </Grid.KeyboardAccelerators>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid x:Name="TitleBarArea" Padding="20,0,0,0">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="12">
+                <Image x:Name="TitleLogo" Width="18" Height="18" />
+                <TextBlock Text="InfoHub Lite" Style="{StaticResource CaptionTextBlockStyle}" VerticalAlignment="Center" />
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1" Padding="16,0,16,12" ColumnSpacing="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="196" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="320" />
+            </Grid.ColumnDefinitions>
+
+            <!-- left: one click swaps the whole layout -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,12,0" Margin="0,0,-12,0">
+                <StackPanel Spacing="6">
+                    <TextBlock Text="樣板" Style="{StaticResource Section}" Margin="2,0,0,2" />
+                    <StackPanel x:Name="TemplateList" Spacing="6" />
+                    <TextBlock Text="我的樣板" Style="{StaticResource Section}" />
+                    <StackPanel x:Name="UserTemplateList" Spacing="6" />
+                    <Button x:Name="SaveTemplateButton" HorizontalAlignment="Stretch" Click="SaveTemplate_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE74E;" FontSize="14" />
+                            <TextBlock Text="存成我的樣板" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- centre: the panel itself; drag things around on it -->
+            <Grid Grid.Column="1" RowSpacing="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <StackPanel Spacing="6">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <DropDownButton x:Name="AddButton">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE710;" FontSize="14" />
+                                <TextBlock Text="新增元件" />
+                            </StackPanel>
+                        </DropDownButton>
+                        <Button x:Name="UndoButton" Click="Undo_Click" IsEnabled="False" ToolTipService.ToolTip="還原上一步（Ctrl+Z）" AutomationProperties.Name="還原">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE7A7;" FontSize="14" />
+                                <TextBlock Text="還原" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="RedoButton" Click="Redo_Click" IsEnabled="False" ToolTipService.ToolTip="重做（Ctrl+Y）" AutomationProperties.Name="重做">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE7A6;" FontSize="14" />
+                                <TextBlock Text="重做" />
+                            </StackPanel>
+                        </Button>
+                        <Border Width="1" Margin="4,6" Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                        <!-- background placement lives here so it is always reachable, whatever is selected -->
+                        <ToggleButton x:Name="BgModeButton" Click="BgMode_Click" IsEnabled="False" ToolTipService.ToolTip="開啟後，在畫布上拖曳就是移動背景">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE7C2;" FontSize="14" />
+                                <TextBlock Text="移動背景" />
+                            </StackPanel>
+                        </ToggleButton>
+                        <Slider x:Name="BgZoom" Width="110" Minimum="100" Maximum="400" Value="100" IsEnabled="False" IsThumbToolTipEnabled="False"
+                                VerticalAlignment="Center" ValueChanged="BgZoom_ValueChanged" AutomationProperties.Name="背景縮放" ToolTipService.ToolTip="背景縮放" />
+                        <TextBlock x:Name="BgZoomText" Width="40" VerticalAlignment="Center" Style="{StaticResource Secondary}" Text="100%" />
+                        <Button x:Name="BgResetButton" Click="BgReset_Click" IsEnabled="False" ToolTipService.ToolTip="背景置中重設" AutomationProperties.Name="背景置中重設">
+                            <FontIcon Glyph="&#xE777;" FontSize="14" />
+                        </Button>
+                    </StackPanel>
+                    <TextBlock x:Name="HintText" Style="{StaticResource Secondary}" TextWrapping="Wrap" />
+                </StackPanel>
+                <Border Grid.Row="1" Style="{StaticResource Card}" CornerRadius="8" Padding="12">
+                    <Grid x:Name="Stage" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Border CornerRadius="6">
+                            <Image x:Name="CanvasImage" Stretch="Fill" />
+                        </Border>
+                        <Canvas x:Name="Overlay" Background="Transparent"
+                                PointerPressed="Overlay_PointerPressed" PointerMoved="Overlay_PointerMoved"
+                                PointerReleased="Overlay_PointerReleased" PointerCaptureLost="Overlay_PointerReleased"
+                                PointerWheelChanged="Overlay_PointerWheelChanged" />
+                    </Grid>
+                </Border>
+                <Grid Grid.Row="2" ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Ellipse x:Name="StatusDot" Width="8" Height="8" VerticalAlignment="Center" />
+                        <TextBlock x:Name="StatusText" Style="{StaticResource Secondary}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="1" Text="螢幕目前畫面" Style="{StaticResource Secondary}" VerticalAlignment="Center" />
+                    <Border Grid.Column="2" CornerRadius="4" Height="54" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+                        <Image x:Name="LiveImage" Stretch="Uniform" />
+                    </Border>
+                </Grid>
+            </Grid>
+
+            <!-- right: the selected element, or the screen and background when nothing is selected -->
+            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto" Padding="0,0,12,0" Margin="0,0,-12,0">
+                <StackPanel x:Name="Props" Spacing="4" />
+            </ScrollViewer>
+        </Grid>
+
+        <!-- nothing reaches the panel until Apply -->
+        <Border Grid.Row="2" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="0,1,0,0" Padding="20,12">
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <Ellipse x:Name="DirtyDot" Width="8" Height="8" VerticalAlignment="Center" />
+                    <TextBlock x:Name="DirtyText" VerticalAlignment="Center" TextWrapping="Wrap" />
+                </StackPanel>
+                <Button x:Name="RestartButton" Grid.Column="1" Content="重新啟動引擎" Visibility="Collapsed" Click="Restart_Click" />
+                <Button x:Name="RevertButton" Grid.Column="2" Content="放棄變更" MinWidth="88" Click="Revert_Click" ToolTipService.ToolTip="回到螢幕上目前的設定" />
+                <Button x:Name="ApplyButton" Grid.Column="3" Content="套用到螢幕" MinWidth="120" Style="{StaticResource AccentButtonStyle}" Click="Apply_Click" />
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
