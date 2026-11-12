@@ -1,0 +1,10 @@
+# Build output
+dist/
+bin/
+obj/
+
+# IDE
+.vs/
+.idea/
+*.user
+*.suo
